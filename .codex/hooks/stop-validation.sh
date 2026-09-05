@@ -31,8 +31,7 @@ for required_file in \
     .codex/hooks/session-start.ps1 \
     .codex/hooks/stop-validation.ps1 \
     .codex/hooks/session-start.sh \
-    .codex/hooks/stop-validation.sh \
-    .agents/skills/resolve-problem/SKILL.md
+    .codex/hooks/stop-validation.sh
 do
     if [ ! -f "$repo_root/$required_file" ]; then
         add_failure "missing $required_file"
@@ -75,13 +74,24 @@ if ! sh -n "$repo_root/.codex/hooks/stop-validation.sh" 2>/dev/null; then
     add_failure 'stop-validation.sh syntax check failed'
 fi
 
-skill_file="$repo_root/.agents/skills/resolve-problem/SKILL.md"
-if [ -f "$skill_file" ]; then
-    if ! grep -Eq '^name:[[:space:]]*resolve-problem[[:space:]]*$' "$skill_file" ||
-       ! grep -Eq '^description:[[:space:]]*[^[:space:]].*$' "$skill_file"; then
-        add_failure 'resolve-problem skill frontmatter is invalid'
+for skill_name in resolve-problem spring-api-implementation pr-review integration-test
+do
+    skill_file="$repo_root/.agents/skills/$skill_name/SKILL.md"
+    if [ ! -f "$skill_file" ]; then
+        add_failure "missing $skill_name/SKILL.md"
+        continue
     fi
-fi
+    if ! awk -v expected="$skill_name" '
+        { sub(/\r$/, "") }
+        NR == 1 { header = ($0 == "---") }
+        NR == 2 { name = ($0 ~ "^name:[ \t]*" expected "[ \t]*$") }
+        NR == 3 { description = ($0 ~ /^description:[ \t]*[^ \t].*$/) }
+        NR == 4 { closing = ($0 == "---") }
+        END { exit !(header && name && description && closing) }
+    ' "$skill_file"; then
+        add_failure "$skill_name skill frontmatter is invalid"
+    fi
+done
 
 if [ "$failure_count" -eq 0 ]; then
     printf '%s\n' '{"continue":true}'
