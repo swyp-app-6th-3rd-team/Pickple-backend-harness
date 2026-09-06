@@ -1,5 +1,7 @@
 [CmdletBinding()]
-param()
+param(
+    [switch] $Strict
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -56,17 +58,8 @@ function Add-Failure {
     [void] $script:failures.Add($Message)
 }
 
-$stopHookActive = $false
-
 try {
-    $eventJson = [Console]::In.ReadToEnd()
-    if (-not [string]::IsNullOrWhiteSpace($eventJson)) {
-        $eventData = $eventJson | ConvertFrom-Json
-        $activeProperty = $eventData.PSObject.Properties['stop_hook_active']
-        if ($null -ne $activeProperty) {
-            $stopHookActive = [bool] $activeProperty.Value
-        }
-    }
+    [Console]::In.ReadToEnd() | Out-Null
 
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
     $script:safeRepoRoot = $script:repoRoot.Replace('\', '/')
@@ -183,34 +176,28 @@ try {
     }
 
     $reason = "Local harness validation failed:`n- " + ($script:failures -join "`n- ")
-    if ($stopHookActive) {
-        Write-HookJson -Value ([ordered]@{
-            continue = $true
-            systemMessage = $reason
-        })
+    if ($Strict) {
+        [Console]::Error.WriteLine($reason)
+        exit 1
     }
-    else {
-        Write-HookJson -Value ([ordered]@{
-            decision = 'block'
-            reason = "$reason`nFix the local harness checks, then try to finish again."
-        })
-    }
+
+    Write-HookJson -Value ([ordered]@{
+        continue = $true
+        systemMessage = "$reason`nThis warning does not authorize changing files outside the user's request."
+    })
 
     exit 0
 }
 catch {
     $failure = 'Local harness validation hook failed unexpectedly. Review the local hook script and Git access.'
-    if ($stopHookActive) {
-        Write-HookJson -Value ([ordered]@{
-            continue = $true
-            systemMessage = $failure
-        })
+    if ($Strict) {
+        [Console]::Error.WriteLine($failure)
+        exit 1
     }
-    else {
-        Write-HookJson -Value ([ordered]@{
-            decision = 'block'
-            reason = "$failure`nInspect the hook configuration before finishing."
-        })
-    }
+
+    Write-HookJson -Value ([ordered]@{
+        continue = $true
+        systemMessage = "$failure This warning does not authorize changing files outside the user's request."
+    })
     exit 0
 }

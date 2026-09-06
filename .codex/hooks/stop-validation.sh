@@ -1,12 +1,13 @@
 #!/bin/sh
 
-# Stop must emit exactly one JSON object on stdout. Checks are intentionally
+# Normal Stop emits exactly one non-blocking JSON object on stdout. --strict
+# returns a failure exit code for explicit harness validation. Checks are
 # bounded to the local harness and never mutate Git state.
 
-event_json=$(cat 2>/dev/null || true)
-stop_hook_active=false
-if printf '%s' "$event_json" | grep -Eq '"stop_hook_active"[[:space:]]*:[[:space:]]*true'; then
-    stop_hook_active=true
+cat >/dev/null 2>&1 || true
+strict=false
+if [ "${1:-}" = '--strict' ]; then
+    strict=true
 fi
 
 script_dir=$(CDPATH= cd -P "$(dirname "$0")" 2>/dev/null && pwd)
@@ -99,10 +100,11 @@ if [ "$failure_count" -eq 0 ]; then
 fi
 
 reason="Local harness validation failed ($failure_count check(s)): $failures"
-if [ "$stop_hook_active" = true ]; then
-    printf '{"continue":true,"systemMessage":"%s"}\n' "$reason"
-else
-    printf '{"decision":"block","reason":"%s. Fix the local harness checks, then try to finish again."}\n' "$reason"
+if [ "$strict" = true ]; then
+    printf '%s\n' "$reason" >&2
+    exit 1
 fi
+
+printf '{"continue":true,"systemMessage":"%s. This warning does not authorize changing files outside the user request."}\n' "$reason"
 
 exit 0

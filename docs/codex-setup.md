@@ -67,16 +67,16 @@ codex mcp login context7
 PowerShell:
 
 ```powershell
-'{"stop_hook_active":false}' | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/stop-validation.ps1
+'{"stop_hook_active":false}' | powershell.exe -NoProfile -ExecutionPolicy Bypass -File .codex/hooks/stop-validation.ps1 -Strict
 ```
 
 macOS/Linux:
 
 ```sh
-printf '%s' '{"stop_hook_active":false}' | sh .codex/hooks/stop-validation.sh
+printf '%s' '{"stop_hook_active":false}' | sh .codex/hooks/stop-validation.sh --strict
 ```
 
-성공 출력은 `{"continue":true}`입니다. 이 확인은 하네스 파일의 기본 구조를 검사하며, 실제 MCP 연결이나 제품 테스트 성공을 뜻하지 않습니다.
+성공 출력은 `{"continue":true}`이고 종료 코드는 0입니다. 엄격 검사에서 문제가 발견되면 종료 코드 1로 실패합니다. Codex의 일반 Stop 훅은 같은 문제를 비차단 경고로 보고하며, 그 경고는 요청 범위 밖 파일 수정 권한을 뜻하지 않습니다. 이 확인은 하네스 파일의 기본 구조를 검사하며, 실제 MCP 연결이나 제품 테스트 성공을 뜻하지 않습니다.
 
 ## 공식 문서
 
