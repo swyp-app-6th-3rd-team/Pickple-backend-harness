@@ -16,6 +16,7 @@ description: Pickple Spring 백엔드 API를 추가하거나 동작을 변경할
 ## 변경을 연결하는 순서
 
 - 기능의 기존 `domain/service/infra/controller` 구조와 명명법을 따라 도메인 불변식, 서비스 유스케이스, 저장·외부 연동, HTTP 변환을 연결한다. 계층별 클래스 생성을 의무화하지 않고 필요한 부분만 변경한다.
+- 설정값 타입은 기존 `@ConfigurationProperties` 관례로 바인딩·검증하며, 도메인 판단이나 유스케이스 실행을 설정 바인딩에 넣지 않는다. 실제 언어와 테스트 도구를 유지하고 다른 언어의 data class·모킹 라이브러리 규칙을 그대로 적용하지 않는다.
 - 데이터 구조가 바뀌면 기존 Flyway 이력과 데이터 영향을 확인하고 순방향 마이그레이션을 추가한다. 요청 범위 밖 리팩터링이나 미들웨어 도입을 섞지 않는다.
 - 인증·공개 범위가 바뀌면 `SecurityConfig`, `ArchitectureTest.PUBLIC_ENDPOINTS`, 컨트롤러 보안 문서와 권한 테스트를 같이 확인한다. 공개 경로 허용과 인증된 사용자의 소유권 검사는 별개로 검증한다.
 - `AGENTS.md`의 API 문서 규칙에 따라 `@Tag`, DTO의 `@Schema`, 필요한 `@SecurityRequirement`를 반영한다. 문서 UI들이 공유하는 OpenAPI와 관련 SPEC 계약을 맞춘다.
