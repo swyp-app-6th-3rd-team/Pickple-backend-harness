@@ -80,7 +80,6 @@ try {
         @{ Path = '.codex\hooks\stop-validation.ps1'; Type = 'Leaf' },
         @{ Path = '.codex\hooks\session-start.sh'; Type = 'Leaf' },
         @{ Path = '.codex\hooks\stop-validation.sh'; Type = 'Leaf' },
-        @{ Path = '.agents\skills\resolve-problem\SKILL.md'; Type = 'Leaf' },
         @{ Path = 'docs\adr'; Type = 'Container' },
         @{ Path = 'docs\prd'; Type = 'Container' }
     )
@@ -163,11 +162,18 @@ try {
         }
     }
 
-    $skillPath = Join-Path $script:repoRoot '.agents\skills\resolve-problem\SKILL.md'
-    if (Test-Path -LiteralPath $skillPath -PathType Leaf) {
-        $skillText = Get-Content -LiteralPath $skillPath -Raw
-        if ($skillText -notmatch '(?s)\A---\s*\r?\nname:\s*resolve-problem\s*\r?\ndescription:\s*.+?\r?\n---') {
-            Add-Failure -Message 'resolve-problem/SKILL.md must contain name and description frontmatter.'
+    $skillNames = @('resolve-problem', 'spring-api-implementation', 'pr-review', 'integration-test')
+    foreach ($skillName in $skillNames) {
+        $skillPath = Join-Path $script:repoRoot ".agents\skills\$skillName\SKILL.md"
+        if (-not (Test-Path -LiteralPath $skillPath -PathType Leaf)) {
+            Add-Failure -Message "Required skill is missing: $skillName/SKILL.md"
+            continue
+        }
+        $skillText = Get-Content -LiteralPath $skillPath -Raw -Encoding UTF8
+        $frontmatterPattern = '(?s)\A---\r?\nname:[ \t]*' + [regex]::Escape($skillName) +
+            '[ \t]*\r?\ndescription:[ \t]*\S[^\r\n]*\r?\n---(?:\r?\n|$)'
+        if ($skillText -notmatch $frontmatterPattern) {
+            Add-Failure -Message "$skillName/SKILL.md must contain matching name and description frontmatter."
         }
     }
 

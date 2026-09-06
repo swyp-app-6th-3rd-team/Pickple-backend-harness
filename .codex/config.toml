@@ -1,0 +1,10 @@
+# Trusted project only. Merge this table into an existing project config.
+# Reuse the connected GitHub app; do not register a duplicate GitHub MCP here.
+# Public documentation queries work without a committed credential.
+# See docs/codex-setup.md for connection checks and optional local authentication.
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+enabled_tools = ["resolve-library-id", "query-docs"]
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+required = false
