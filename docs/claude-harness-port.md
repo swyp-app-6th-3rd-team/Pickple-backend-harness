@@ -14,6 +14,7 @@
 | `workflow-cycle.md` | 기존 조건부 개발 흐름을 유지하고 완료 조건과 증거의 대조, 요구사항 원문과 SPEC·PRD·ADR의 역할 구분을 보강했다. |
 | `thinking-discipline.md`, `SKILL.md` | 기존 `resolve-problem`에 병목 비중과 전체 효과 점검을 보강했다. 중복된 사고 단계는 추가하지 않았으며, 근거 없는 확률 수치는 사용하지 않도록 했다. |
 | `kotlin-spring.md` | 설정 바인딩에 도메인 로직을 넣지 않는 원칙만 Java/Spring 스킬에 반영했다. Kotlin 문법·도구와 Controller → Service → Repository 직접 의존은 현재 Java/DDD 경계에 맞지 않아 제외했다. |
+| `layer-responsibility.md` | 원본 파일은 확보하지 못해 이슈 #8의 요구와 백엔드 ADR-0019·0020, 현재 저장소·서비스·스키마를 대조했다. 저장 사실/정책 판단, 무결성 원인 보존, 트랜잭션 실패 전파, UNIQUE·FK와 저장 시 도메인 검증을 `AGENTS.md` 및 `pr-review`에 반영했고, 기존 구현의 불일치는 별도 백엔드 정비 대상으로 남겼다. |
 | `react-frontend.md` | 현재 백엔드 범위에 맞지 않아 제외했다. React 상태관리·폼·디자인 도구를 도입하지 않는다. |
 | `settings.local.json` | Anthropic 프록시 환경변수, Claude 권한·훅, 개인 플러그인 설정은 복사하지 않았다. 현재 Codex 설정·훅을 유지한다. |
 | `_` 접두사 파일, `download` 변형 파일 | 파일 시그니처로 AppleDouble 리소스 메타데이터와 `.DS_Store` 계열 파일임을 확인했다. 지침 본문이 아니므로 저장소에 추가하지 않았다. |
